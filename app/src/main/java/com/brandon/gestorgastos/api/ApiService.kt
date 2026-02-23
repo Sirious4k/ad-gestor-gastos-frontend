@@ -23,7 +23,7 @@ interface ApiService {
 
     // Transacciones
     @POST("api/transacciones")
-    suspend fun crearTransacciones(@Body transaccion: Transaccion): Response<Transaccion>
+    suspend fun crearTransaccion(@Body transaccion: Transaccion): Response<Transaccion>
 
     @GET
     suspend fun obtenerTransacciones(): Response<List<Transaccion>>
