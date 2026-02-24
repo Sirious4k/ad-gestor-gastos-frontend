@@ -7,7 +7,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://ad-gestor-gastos-backend-production.up.railway.app"
+    private const val BASE_URL = "https://ad-gestor-gastos-backend-production.up.railway.app/"
 
     // Logging interceptor para ver las requests en Logcat
     private val loggingInterceptor = HttpLoggingInterceptor().apply {

@@ -15,6 +15,10 @@ class TransaccionViewModel : ViewModel() {
     private val _transacciones = MutableLiveData<List<Transaccion>>()
     val transacciones: LiveData<List<Transaccion>> = _transacciones
 
+    // LiveData para mensajes de éxito
+    private val _isOk = MutableLiveData<String>()
+    val isOk: LiveData<String> = _isOk
+
     // LiveData para mensajes de error
     private val _error = MutableLiveData<String>()
     val error: LiveData<String> = _error
@@ -31,6 +35,25 @@ class TransaccionViewModel : ViewModel() {
                 val response = repository.obtenerTransacciones()
                 if (response.isSuccessful) {
                     _transacciones.value = response.body() ?: emptyList()
+                } else {
+                    _error.value = "Error: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _error.value = "Error de conexión: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun crearTransaccion(transaccion: Transaccion) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = repository.crearTransaccion(transaccion)
+                if (response.isSuccessful) {
+                    _isOk.value = "Transacción creada con éxito ✅"
+                    obtenerTransacciones()
                 } else {
                     _error.value = "Error: ${response.code()}"
                 }

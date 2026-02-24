@@ -11,20 +11,20 @@ interface ApiService {
     @POST("api/usuarios")
     suspend fun crearUsuario(@Body usuario: Usuario): Response<Usuario>
 
-    @GET
+    @GET("api/usuarios")
     suspend fun obtenerUsuarios(): Response<List<Usuario>>
 
     // Categorias
     @POST("api/categorias")
     suspend fun crearCategoria(@Body categoria: Categoria): Response<Categoria>
 
-    @GET
+    @GET("api/categorias")
     suspend fun obtenerCategorias(): Response<List<Categoria>>
 
     // Transacciones
     @POST("api/transacciones")
     suspend fun crearTransaccion(@Body transaccion: Transaccion): Response<Transaccion>
 
-    @GET
+    @GET("api/transacciones")
     suspend fun obtenerTransacciones(): Response<List<Transaccion>>
 }

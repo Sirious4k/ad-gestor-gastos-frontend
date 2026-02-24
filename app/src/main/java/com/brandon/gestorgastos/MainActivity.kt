@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.brandon.gestorgastos.ui.navigation.AppNavigation
 import com.brandon.gestorgastos.ui.theme.GestorGastosTheme
 
 class MainActivity : ComponentActivity() {
