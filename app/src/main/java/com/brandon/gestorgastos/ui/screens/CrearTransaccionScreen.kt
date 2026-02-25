@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.brandon.gestorgastos.model.Categoria
 import com.brandon.gestorgastos.model.TipoTransaccion
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.model.Usuario
@@ -49,15 +51,13 @@ fun CrearTransaccionScreen (
 
     var monto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var usuario: Usuario
+    var usuario by remember { mutableStateOf("") }
     // var nombreUsuario = usuario.nombre ---- usar mas adelante
     var fecha by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val options = listOf(TipoTransaccion.GASTO, TipoTransaccion.INGRESO)
     var selectedOptionText by remember { mutableStateOf(options[0]) }
-
-    val transaccion: Transaccion
 
 
     Scaffold(
@@ -109,11 +109,11 @@ fun CrearTransaccionScreen (
                             onExpandedChange = { expanded = !expanded }
                         ) {
                             TextField(
-                                value = selectedOptionText,
+                                value = selectedOptionText.toString(),
                                 onValueChange = {},
                                 readOnly = true,
                                 label = { Text("Seleccionar el tipo de transacción") },
-                                trailingIcon = { expanded },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                                 modifier = Modifier.menuAnchor()
                             )
                             ExposedDropdownMenu(
@@ -122,7 +122,7 @@ fun CrearTransaccionScreen (
                             ) {
                                 options.forEach { selectionOption ->
                                     DropdownMenuItem(
-                                        text = { Text(selectionOption) },
+                                        text = { Text(selectionOption.toString()) },
                                         onClick = {
                                             selectedOptionText = selectionOption
                                             expanded = false
@@ -176,33 +176,38 @@ fun CrearTransaccionScreen (
                             placeholder = { Text("Descripción (opcional)") }
                         )
 
-                        val usuarioFinal = usuario
-                        val tipoFinal = selectedOptionText
-                        val montoFinal = monto
-                        val fechaFinal = fecha
-                        val categoriaFinal = categoria
-                        val descripcionFinal = descripcion
-
-                        transaccion.usuario = usuarioFinal
-                        transaccion.tipo = tipoFinal
-                        transaccion.monto = montoFinal
-                        transaccion.fecha = fechaFinal
-                        transaccion.categoria = categoriaFinal
-                        transaccion.descripcion = descripcionFinal
-
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                val usuarioObj = Usuario(id = 1, nombre = usuario, email = "", password = "")
-                                // Aquí CREAS la transacción y la envías
-                                viewModel.crearTransaccion(transaccion) // ❌ Ejecuta INMEDIATAMENTE
-                            }
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Crear transacción")
+                            Button(
+                                onClick = {
+                                    if (monto.isNotEmpty() && monto.toIntOrNull() != null){
+                                        // validacion monto
+                                    }
+                                    // CREAR OTRAS VALIDACIONES
+
+                                    // CREAR SNACKBAR (isOk) Y NAVEGACION
+                                    val usuarioObj = Usuario(id = 1, nombre = usuario, email = "", password = "")
+                                    val tipoFinal = selectedOptionText
+                                    val montoFinal = monto
+                                    val fechaFinal = fecha
+                                    val categoriaObj = Categoria(1, "Vicio")
+                                    val descripcionFinal = descripcion
+
+                                    val transaccion = Transaccion(
+                                        null,
+                                        usuarioObj,
+                                        tipoFinal,
+                                        montoFinal.toInt(),
+                                        fechaFinal,
+                                        categoriaObj,
+                                        descripcionFinal)
+
+                                    viewModel.crearTransaccion(transaccion)
+                                }
+                            ) {
+                                Text("Crear transacción")
+                            }
                         }
                     }
                 }
