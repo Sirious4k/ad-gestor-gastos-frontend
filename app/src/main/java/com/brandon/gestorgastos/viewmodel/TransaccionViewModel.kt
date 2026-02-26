@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlin.reflect.full.memberProperties
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.repository.TransaccionRepository
 import kotlinx.coroutines.launch
@@ -61,6 +62,23 @@ class TransaccionViewModel : ViewModel() {
                 _error.value = "Error de conexión: ${e.message}"
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun validacionTransaccion(transaccion: Transaccion) {
+        viewModelScope.launch {
+            var mensajeError: String
+            try {
+                if (transaccion.monto == 0) {
+                    _error.value = "El monto es obligatorio"
+                }
+                if (transaccion.fecha.isEmpty()) {
+                    _error.value = "La fecha es obligatoria"
+                }
+                if (transaccion.usuario.)
+            } catch (e: Exception) {
+                _error.value = "Error de conexión: ${e.message}"
             }
         }
     }

@@ -10,18 +10,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.brandon.gestorgastos.ui.components.TransaccionCard
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransaccionesScreen (
-    viewModel: TransaccionViewModel = viewModel()
+    viewModel: TransaccionViewModel = viewModel(),
+    navController: NavController
 ) {
     // Observar los estados del ViewModel
     val transacciones by viewModel.transacciones.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
     val error by viewModel.error.observeAsState()
+    val navController = rememberNavController()
 
     // Cargar transacciones al iniciar
     LaunchedEffect(Unit) {
@@ -73,6 +77,20 @@ fun TransaccionesScreen (
                             TransaccionCard(transaccion = transaccion)
                         }
                     }
+                }
+            }
+
+            // MÁS ADELANTE ARREGLAR DISEÑO DE LO SIGUIENTE
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = { navController.navigate("crearTransaccion") }
+                ) {
+                    Text("Crear nueva transacción")
                 }
             }
         }

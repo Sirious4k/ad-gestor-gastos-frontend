@@ -13,13 +13,13 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "crear transacciones"
+        startDestination = "crearTransaccion"
     ) {
         composable("transacciones") {
-            TransaccionesScreen()
+            TransaccionesScreen(navController = navController)
         }
-        composable("crear transacciones") {
-            CrearTransaccionScreen()
+        composable("crearTransaccion") {
+            CrearTransaccionScreen(navController = navController)
         }
     }
 }

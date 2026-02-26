@@ -17,37 +17,45 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.brandon.gestorgastos.model.Categoria
 import com.brandon.gestorgastos.model.TipoTransaccion
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.model.Usuario
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CrearTransaccionScreen (
     viewModel: TransaccionViewModel = viewModel(),
-    onClick: () -> Unit
+    navController: NavController
     // usuario: Usuario ---- para mas adelante
 ) {
     // Observar los estados del ViewModel
     val isLoading by viewModel.isLoading.observeAsState(false)
     val isOk by viewModel.isOk.observeAsState()
     val error by viewModel.error.observeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     var monto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
@@ -61,6 +69,7 @@ fun CrearTransaccionScreen (
 
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Agregar nueva Transacción") },
@@ -181,12 +190,6 @@ fun CrearTransaccionScreen (
                         ) {
                             Button(
                                 onClick = {
-                                    if (monto.isNotEmpty() && monto.toIntOrNull() != null){
-                                        // validacion monto
-                                    }
-                                    // CREAR OTRAS VALIDACIONES
-
-                                    // CREAR SNACKBAR (isOk) Y NAVEGACION
                                     val usuarioObj = Usuario(id = 1, nombre = usuario, email = "", password = "")
                                     val tipoFinal = selectedOptionText
                                     val montoFinal = monto
@@ -203,14 +206,32 @@ fun CrearTransaccionScreen (
                                         categoriaObj,
                                         descripcionFinal)
 
-                                    viewModel.crearTransaccion(transaccion)
+                                    if (isOk != null) {
+                                        navController.navigate("transacciones")
+                                    } else {
+                                        println("Error desconocido")
+                                    }
                                 }
                             ) {
                                 Text("Crear transacción")
                             }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Button(
+                                onClick = { navController.navigate("transacciones") }
+                            ) {
+                                Text("Ir a mis transacciones")
+                            }
                         }
                     }
                 }
+            }
+        }
+        LaunchedEffect(isOk) {
+            snackbarHostState.showSnackbar(isOk.toString())
+            scope.launch {
+                viewModel.validacionTransaccion(transaccion)
             }
         }
     }
