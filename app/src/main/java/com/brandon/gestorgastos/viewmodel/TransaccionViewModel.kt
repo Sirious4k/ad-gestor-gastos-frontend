@@ -66,20 +66,19 @@ class TransaccionViewModel : ViewModel() {
         }
     }
 
-    fun validacionTransaccion(transaccion: Transaccion) {
-        viewModelScope.launch {
-            var mensajeError: String
-            try {
-                if (transaccion.monto == 0) {
-                    _error.value = "El monto es obligatorio"
-                }
-                if (transaccion.fecha.isEmpty()) {
-                    _error.value = "La fecha es obligatoria"
-                }
-                if (transaccion.usuario.)
-            } catch (e: Exception) {
-                _error.value = "Error de conexión: ${e.message}"
-            }
+    fun validacionTransaccion(transaccion: Transaccion): String? {
+        if (transaccion.monto == 0) {
+            return "El monto debe ser superior a 0"
         }
+        if (transaccion.fecha.isEmpty()) {
+            return "La fecha es obligatoria"
+        }
+        if (transaccion.usuario == null) {
+            return "Usuario no cargado"
+        }
+        if (transaccion.categoria == null) {
+            return "La categoría es obligatoria"
+        }
+        return null
     }
 }

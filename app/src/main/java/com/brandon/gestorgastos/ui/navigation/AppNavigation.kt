@@ -13,7 +13,7 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "crearTransaccion"
+        startDestination = "transacciones"
     ) {
         composable("transacciones") {
             TransaccionesScreen(navController = navController)

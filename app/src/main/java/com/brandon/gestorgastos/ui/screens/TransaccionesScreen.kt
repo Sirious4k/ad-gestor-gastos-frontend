@@ -3,6 +3,8 @@ package com.brandon.gestorgastos.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -25,7 +27,6 @@ fun TransaccionesScreen (
     val transacciones by viewModel.transacciones.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
     val error by viewModel.error.observeAsState()
-    val navController = rememberNavController()
 
     // Cargar transacciones al iniciar
     LaunchedEffect(Unit) {
@@ -41,6 +42,13 @@ fun TransaccionesScreen (
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate("crearTransaccion") }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Agregar")
+            }
         }
     ) { paddingValues ->
         Box(
@@ -77,20 +85,6 @@ fun TransaccionesScreen (
                             TransaccionCard(transaccion = transaccion)
                         }
                     }
-                }
-            }
-
-            // MÁS ADELANTE ARREGLAR DISEÑO DE LO SIGUIENTE
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = { navController.navigate("crearTransaccion") }
-                ) {
-                    Text("Crear nueva transacción")
                 }
             }
         }

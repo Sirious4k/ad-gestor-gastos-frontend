@@ -8,21 +8,31 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,6 +43,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -40,8 +55,12 @@ import com.brandon.gestorgastos.model.Categoria
 import com.brandon.gestorgastos.model.TipoTransaccion
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.model.Usuario
+import com.brandon.gestorgastos.utils.formatearMonto
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +81,8 @@ fun CrearTransaccionScreen (
     var usuario by remember { mutableStateOf("") }
     // var nombreUsuario = usuario.nombre ---- usar mas adelante
     var fecha by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
     var categoria by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val options = listOf(TipoTransaccion.GASTO, TipoTransaccion.INGRESO)
@@ -102,24 +123,14 @@ fun CrearTransaccionScreen (
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        OutlinedTextField(
-                            value = usuario,
-                            onValueChange = { usuario = it },
-                            label = { Text("Usuario") },
-                            modifier = Modifier.padding(16.dp),
-                            singleLine = true,
-                            placeholder = { Text("Ingrese su usuario") }
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         ExposedDropdownMenuBox(
                             expanded = expanded,
-                            onExpandedChange = { expanded = !expanded }
+                            onExpandedChange = { expanded = !expanded },
+                            modifier = Modifier.padding(16.dp)
                         ) {
                             TextField(
                                 value = selectedOptionText.toString(),
-                                onValueChange = {},
+                                onValueChange = { },
                                 readOnly = true,
                                 label = { Text("Seleccionar el tipo de transacción") },
                                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -141,29 +152,46 @@ fun CrearTransaccionScreen (
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         OutlinedTextField(
                             value = monto,
                             onValueChange = { monto = it },
                             label = { Text("Monto") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.padding(16.dp),
                             singleLine = true,
                             placeholder = { Text("Ingrese el monto") }
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         OutlinedTextField(
                             value = fecha,
-                            onValueChange = { fecha = it },
+                            onValueChange = { },
                             label = { Text("Fecha") },
-                            modifier = Modifier.padding(16.dp),
-                            singleLine = true,
-                            placeholder = { Text("Ingrese la fecha") }
+                            readOnly = true,
+                            trailingIcon = {
+                                IconButton(onClick = { showDialog = true }) {
+                                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
+                                }
+                            },
+                            modifier = Modifier.padding(16.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        if (showDialog) {
+                            DatePickerDialog(
+                                onDismissRequest = { showDialog = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        val selectedDate = datePickerState.selectedDateMillis
+                                        if (selectedDate != null) {
+                                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                            fecha = formatter.format(Date(selectedDate))
+                                        }
+                                        showDialog = false
+                                    }) { Text("Aceptar") }
+                                }
+                            ) {
+                                DatePicker(state = datePickerState)
+                            }
+                        }
 
                         OutlinedTextField(
                             value = categoria,
@@ -174,21 +202,24 @@ fun CrearTransaccionScreen (
                             placeholder = { Text("Ingrese la categoría") }
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         OutlinedTextField(
                             value = descripcion,
-                            onValueChange = { descripcion = it }, // crear categoria mas adelante
+                            onValueChange = { descripcion = it },
                             label = { Text("Descripción") },
                             modifier = Modifier.padding(16.dp),
                             singleLine = true,
                             placeholder = { Text("Descripción (opcional)") }
                         )
 
-                        Row(
+                        Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Button(
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Blue,
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.padding(16.dp),
                                 onClick = {
                                     val usuarioObj = Usuario(id = 1, nombre = usuario, email = "", password = "")
                                     val tipoFinal = selectedOptionText
@@ -197,28 +228,38 @@ fun CrearTransaccionScreen (
                                     val categoriaObj = Categoria(1, "Vicio")
                                     val descripcionFinal = descripcion
 
-                                    val transaccion = Transaccion(
-                                        null,
-                                        usuarioObj,
-                                        tipoFinal,
-                                        montoFinal.toInt(),
-                                        fechaFinal,
-                                        categoriaObj,
-                                        descripcionFinal)
-
-                                    if (isOk != null) {
-                                        navController.navigate("transacciones")
+                                    // VALIDACIONES
+                                    if (montoFinal.toIntOrNull() == null) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("El monto es obligatorio")
+                                        }
                                     } else {
-                                        println("Error desconocido")
+                                        val transaccion = Transaccion(
+                                            null,
+                                            usuarioObj,
+                                            tipoFinal,
+                                            montoFinal.toInt(),
+                                            fechaFinal,
+                                            categoriaObj,
+                                            descripcionFinal)
+
+                                        viewModel.validacionTransaccion(transaccion)
+                                        val validacion = viewModel.validacionTransaccion(transaccion)
+                                        if (validacion != null) {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(validacion)
+                                            }
+                                        } else {
+                                            viewModel.crearTransaccion(transaccion)
+                                        }
                                     }
                                 }
                             ) {
                                 Text("Crear transacción")
                             }
 
-                            Spacer(modifier = Modifier.height(8.dp))
-
                             Button(
+                                modifier = Modifier.padding(16.dp),
                                 onClick = { navController.navigate("transacciones") }
                             ) {
                                 Text("Ir a mis transacciones")
@@ -227,11 +268,11 @@ fun CrearTransaccionScreen (
                     }
                 }
             }
-        }
-        LaunchedEffect(isOk) {
-            snackbarHostState.showSnackbar(isOk.toString())
-            scope.launch {
-                viewModel.validacionTransaccion(transaccion)
+            LaunchedEffect(isOk) {
+                isOk?.let {
+                    snackbarHostState.showSnackbar(it)
+                    navController.navigate("transacciones")
+                }
             }
         }
     }
