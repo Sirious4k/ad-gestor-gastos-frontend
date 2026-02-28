@@ -2,15 +2,13 @@ package com.brandon.gestorgastos.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,10 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -55,7 +50,6 @@ import com.brandon.gestorgastos.model.Categoria
 import com.brandon.gestorgastos.model.TipoTransaccion
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.model.Usuario
-import com.brandon.gestorgastos.utils.formatearMonto
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -78,15 +72,18 @@ fun CrearTransaccionScreen (
 
     var monto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    var usuario by remember { mutableStateOf("") }
     // var nombreUsuario = usuario.nombre ---- usar mas adelante
     var fecha by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-    var categoria by remember { mutableStateOf("") }
+    val categorias by viewModel.categorias.observeAsState(emptyList())
+    var categoriaSeleccionada by remember { mutableStateOf<Categoria?>(null) }
+    var expandedCategoria by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     val options = listOf(TipoTransaccion.GASTO, TipoTransaccion.INGRESO)
     var selectedOptionText by remember { mutableStateOf(options[0]) }
+    var showCrearCategoriaDialog by remember { mutableStateOf(false) }
+    var nombreNuevaCategoria by remember { mutableStateOf("") }
 
 
     Scaffold(
@@ -106,6 +103,9 @@ fun CrearTransaccionScreen (
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+            LaunchedEffect(Unit) {
+                viewModel.obtenerCategorias()
+            }
             when {
                 isLoading -> {
                     CircularProgressIndicator(
@@ -182,7 +182,7 @@ fun CrearTransaccionScreen (
                                     TextButton(onClick = {
                                         val selectedDate = datePickerState.selectedDateMillis
                                         if (selectedDate != null) {
-                                            val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                            val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
                                             fecha = formatter.format(Date(selectedDate))
                                         }
                                         showDialog = false
@@ -193,14 +193,84 @@ fun CrearTransaccionScreen (
                             }
                         }
 
-                        OutlinedTextField(
-                            value = categoria,
-                            onValueChange = { categoria = it }, // crear categoria mas adelante
-                            label = { Text("Categoría") },
-                            modifier = Modifier.padding(16.dp),
-                            singleLine = true,
-                            placeholder = { Text("Ingrese la categoría") }
-                        )
+                        ExposedDropdownMenuBox(
+                            expanded = expandedCategoria,
+                            onExpandedChange = { expandedCategoria = !expandedCategoria },
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            TextField(
+                                value = categoriaSeleccionada?.nombre ?: "",
+                                onValueChange = { },
+                                readOnly = true,
+                                label = { Text("Seleccionar la categoría") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedCategoria) },
+                                modifier = Modifier.menuAnchor()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expandedCategoria,
+                                onDismissRequest = { expandedCategoria = false }
+                            ) {
+                                categorias.forEach { categoria ->
+                                    DropdownMenuItem(
+                                        text = { Text(categoria.nombre) },
+                                        onClick = {
+                                            categoriaSeleccionada = categoria
+                                            expandedCategoria = false
+                                        }
+                                    )
+                                }
+                                DropdownMenuItem(
+                                    text = { Text(" + Crear nueva categoría") },
+                                    onClick = {
+                                        expandedCategoria = false
+                                        showCrearCategoriaDialog = true
+                                    }
+                                )
+                            }
+                        }
+                        if (showCrearCategoriaDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showCrearCategoriaDialog = false },
+                                title = { Text("Crear nueva categoría") },
+                                text = {
+                                    OutlinedTextField(
+                                        value = nombreNuevaCategoria,
+                                        onValueChange = { nombreNuevaCategoria = it },
+                                        label = { Text("Nombre de categoría") },
+                                        singleLine = true,
+                                        placeholder = { Text("Categoría") }
+                                    )
+                                },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            if (nombreNuevaCategoria == "") {
+                                                scope.launch {
+                                                    snackbarHostState.showSnackbar("⚠️ El nombre de la categoría es obligatorio")
+                                                }
+                                                return@TextButton
+                                            } else {
+                                                val categoria = Categoria(nombre = nombreNuevaCategoria)
+                                                viewModel.crearCategoria(categoria)
+                                                showCrearCategoriaDialog = false
+                                                categoriaSeleccionada = categoria
+                                            }
+                                        }
+                                    ) {
+                                        Text("Confirmar")
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(
+                                        onClick = {
+                                            showCrearCategoriaDialog = false
+                                        }
+                                    ) {
+                                        Text("Cancelar")
+                                    }
+                                }
+                            )
+                    }
 
                         OutlinedTextField(
                             value = descripcion,
@@ -221,11 +291,11 @@ fun CrearTransaccionScreen (
                                 ),
                                 modifier = Modifier.padding(16.dp),
                                 onClick = {
-                                    val usuarioObj = Usuario(id = 1, nombre = usuario, email = "", password = "")
+                                    val usuarioObj = Usuario(id = 1, nombre = "prueba1", email = "admin@admin.com", password = "admin123")
                                     val tipoFinal = selectedOptionText
                                     val montoFinal = monto
                                     val fechaFinal = fecha
-                                    val categoriaObj = Categoria(1, "Vicio")
+                                    val categoriaObj = Categoria(1, "Comida")
                                     val descripcionFinal = descripcion
 
                                     // VALIDACIONES
@@ -243,7 +313,6 @@ fun CrearTransaccionScreen (
                                             categoriaObj,
                                             descripcionFinal)
 
-                                        viewModel.validacionTransaccion(transaccion)
                                         val validacion = viewModel.validacionTransaccion(transaccion)
                                         if (validacion != null) {
                                             scope.launch {
@@ -271,7 +340,6 @@ fun CrearTransaccionScreen (
             LaunchedEffect(isOk) {
                 isOk?.let {
                     snackbarHostState.showSnackbar(it)
-                    navController.navigate("transacciones")
                 }
             }
         }
