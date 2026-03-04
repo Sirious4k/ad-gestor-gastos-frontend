@@ -23,4 +23,6 @@ class TransaccionRepository {
     suspend fun crearTransaccion(transaccion: Transaccion) = apiService.crearTransaccion(transaccion)
 
     suspend fun obtenerTransacciones() = apiService.obtenerTransacciones()
+
+    suspend fun eliminarTransaccionPorId(id: Long) = apiService.eliminarTransaccionPorId(id)
 }

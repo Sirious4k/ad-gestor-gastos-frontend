@@ -27,4 +27,7 @@ interface ApiService {
 
     @GET("api/transacciones")
     suspend fun obtenerTransacciones(): Response<List<Transaccion>>
+
+    @DELETE("api/transacciones/{id}")
+    suspend fun eliminarTransaccionPorId(@Path("id") id: Long): Response<Unit>
 }

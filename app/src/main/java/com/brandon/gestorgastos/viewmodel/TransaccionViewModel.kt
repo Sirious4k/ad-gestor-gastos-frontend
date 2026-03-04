@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brandon.gestorgastos.model.Categoria
 import kotlin.reflect.full.memberProperties
 import com.brandon.gestorgastos.model.Transaccion
@@ -112,6 +113,25 @@ class TransaccionViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _isOk.value = "Categoría creada con éxito ✅"
                     obtenerCategorias()
+                } else {
+                    _error.value = "Error: ${response.code()}"
+                }
+            } catch (e: Exception) {
+                _error.value = "Error de conexión: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun eliminarTransaccionPorId(id: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val response = repository.eliminarTransaccionPorId(id)
+                if (response.isSuccessful) {
+                    _isOk.value = "Transacción eliminada con éxito"
+                    obtenerTransacciones()
                 } else {
                     _error.value = "Error: ${response.code()}"
                 }

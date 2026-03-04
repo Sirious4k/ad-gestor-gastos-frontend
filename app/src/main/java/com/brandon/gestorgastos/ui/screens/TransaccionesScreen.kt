@@ -27,6 +27,8 @@ fun TransaccionesScreen (
     val transacciones by viewModel.transacciones.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
     val error by viewModel.error.observeAsState()
+    val isOk by viewModel.isOk.observeAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Cargar transacciones al iniciar
     LaunchedEffect(Unit) {
@@ -34,6 +36,7 @@ fun TransaccionesScreen (
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Mis Transacciones") },
@@ -82,11 +85,19 @@ fun TransaccionesScreen (
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(transacciones) { transaccion ->
-                            TransaccionCard(transaccion = transaccion)
+                            TransaccionCard(
+                                transaccion = transaccion,
+                                snackbarHostState = snackbarHostState
+                            )
                         }
                     }
                 }
             }
+        }
+    }
+    LaunchedEffect(isOk) {
+        isOk?.let {
+            snackbarHostState.showSnackbar(it)
         }
     }
 }

@@ -295,7 +295,7 @@ fun CrearTransaccionScreen (
                                     val tipoFinal = selectedOptionText
                                     val montoFinal = monto
                                     val fechaFinal = fecha
-                                    val categoriaObj = Categoria(1, "Comida")
+                                    val categoriaObj = categoriaSeleccionada
                                     val descripcionFinal = descripcion
 
                                     // VALIDACIONES
