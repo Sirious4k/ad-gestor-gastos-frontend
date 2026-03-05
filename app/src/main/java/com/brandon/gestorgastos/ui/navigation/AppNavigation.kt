@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.brandon.gestorgastos.ui.screens.CrearTransaccionScreen
+import com.brandon.gestorgastos.ui.screens.LoginScreen
 import com.brandon.gestorgastos.ui.screens.TransaccionesScreen
 
 @Composable
@@ -20,6 +21,9 @@ fun AppNavigation() {
         }
         composable("crearTransaccion") {
             CrearTransaccionScreen(navController = navController)
+        }
+        composable("login") {
+            LoginScreen(navController = navController)
         }
     }
 }

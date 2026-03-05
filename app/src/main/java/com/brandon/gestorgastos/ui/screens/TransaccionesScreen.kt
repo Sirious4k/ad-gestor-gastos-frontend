@@ -32,7 +32,7 @@ fun TransaccionesScreen (
 
     // Cargar transacciones al iniciar
     LaunchedEffect(Unit) {
-        viewModel.obtenerTransacciones()
+        viewModel.obtenerTransacciones(usuarioId) // SOLUCIONAR AL TERMINAR LOGIN
     }
 
     Scaffold(

@@ -1,6 +1,8 @@
 package com.brandon.gestorgastos.api
 
 import com.brandon.gestorgastos.model.Categoria
+import com.brandon.gestorgastos.model.LoginRequest
+import com.brandon.gestorgastos.model.RegisterRequest
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.model.Usuario
 import retrofit2.Response
@@ -26,8 +28,14 @@ interface ApiService {
     suspend fun crearTransaccion(@Body transaccion: Transaccion): Response<Transaccion>
 
     @GET("api/transacciones")
-    suspend fun obtenerTransacciones(): Response<List<Transaccion>>
+    suspend fun obtenerTransacciones(@Query("usuarioId") usuarioId: Long): Response<List<Transaccion>>
 
     @DELETE("api/transacciones/{id}")
     suspend fun eliminarTransaccionPorId(@Path("id") id: Long): Response<Unit>
+
+    @POST("api/auth/login")
+    suspend fun login(@Body loginRequest: LoginRequest): Response<Usuario>
+
+    @POST("api/auth/register")
+    suspend fun register(@Body registerRequest: RegisterRequest): Response<Usuario>
 }

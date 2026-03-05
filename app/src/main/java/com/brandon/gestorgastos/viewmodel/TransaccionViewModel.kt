@@ -35,11 +35,11 @@ class TransaccionViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     // Obtener todas las transacciones
-    fun obtenerTransacciones() {
+    fun obtenerTransacciones(usuarioId: Long) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = repository.obtenerTransacciones()
+                val response = repository.obtenerTransacciones(usuarioId)
                 if (response.isSuccessful) {
                     _transacciones.value = response.body() ?: emptyList()
                 } else {
@@ -124,14 +124,14 @@ class TransaccionViewModel : ViewModel() {
         }
     }
 
-    fun eliminarTransaccionPorId(id: Long) {
+    fun eliminarTransaccionPorId(deleteId: Long, usuarioId: Long) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                val response = repository.eliminarTransaccionPorId(id)
+                val response = repository.eliminarTransaccionPorId(deleteId)
                 if (response.isSuccessful) {
                     _isOk.value = "Transacción eliminada con éxito"
-                    obtenerTransacciones()
+                    obtenerTransacciones(usuarioId)
                 } else {
                     _error.value = "Error: ${response.code()}"
                 }

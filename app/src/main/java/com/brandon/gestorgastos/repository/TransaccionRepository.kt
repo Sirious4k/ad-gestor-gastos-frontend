@@ -9,11 +9,6 @@ import com.brandon.gestorgastos.ui.RetrofitClient
 class TransaccionRepository {
     private val apiService = RetrofitClient.apiService
 
-    // Usuarios
-    suspend fun crearUsuario(usuario: Usuario) = apiService.crearUsuario(usuario)
-
-    suspend fun obtenerUsuarios() = apiService.obtenerUsuarios()
-
     // Categorias
     suspend fun crearCategoria(categoria: Categoria) = apiService.crearCategoria(categoria)
 
@@ -22,7 +17,7 @@ class TransaccionRepository {
     // Transacciones
     suspend fun crearTransaccion(transaccion: Transaccion) = apiService.crearTransaccion(transaccion)
 
-    suspend fun obtenerTransacciones() = apiService.obtenerTransacciones()
+    suspend fun obtenerTransacciones(usuarioId: Long) = apiService.obtenerTransacciones(usuarioId)
 
     suspend fun eliminarTransaccionPorId(id: Long) = apiService.eliminarTransaccionPorId(id)
 }

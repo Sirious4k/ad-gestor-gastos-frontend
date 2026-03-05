@@ -1,6 +1,5 @@
 package com.brandon.gestorgastos.ui.components
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,12 +21,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +35,6 @@ import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.ui.theme.GastoRojo
 import com.brandon.gestorgastos.ui.theme.IngresoVerde
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun TransaccionCard (
@@ -97,61 +92,61 @@ fun TransaccionCard (
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-            Box {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
-                }
-
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Eliminar") },
-                        onClick = {
-                            expanded = false
-                            showEliminarTransaccion = true
-                        },
-                        colors = MenuDefaults.itemColors(
-                            textColor = Color.Red
-                        )
-                    )
-
-                    DropdownMenuItem(
-                        text = { Text("Editar") },
-                        onClick = {
-                            expanded = false
-                            // AGREGAR FUNCION DE EDITAR
-                        }
-                    )
-                }
-
-                if (showEliminarTransaccion) {
-                    AlertDialog(
-                        onDismissRequest = { showEliminarTransaccion = false },
-                        title = { Text("Menú de confirmación") },
-                        text = { Text("¿Estás seguro que desea eliminar esta transacción?") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    transaccion.id?.let { id ->
-                                        viewModel.eliminarTransaccionPorId(id)
-                                    }
-                                    showEliminarTransaccion = false
-                                }
-                            ) {
-                                Text("Confirmar")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showEliminarTransaccion = false }
-                            ) {
-                                Text("Cancelar")
-                            }
-                        }
-                    )
-                }
+        Box {
+            IconButton(onClick = { expanded = true }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Más opciones")
             }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Eliminar") },
+                    onClick = {
+                        expanded = false
+                        showEliminarTransaccion = true
+                    },
+                    colors = MenuDefaults.itemColors(
+                        textColor = Color.Red
+                    )
+                )
+
+                DropdownMenuItem(
+                    text = { Text("Editar") },
+                    onClick = {
+                        expanded = false
+                        // AGREGAR FUNCION DE EDITAR
+                    }
+                )
+            }
+
+            if (showEliminarTransaccion) {
+                AlertDialog(
+                    onDismissRequest = { showEliminarTransaccion = false },
+                    title = { Text("Menú de confirmación") },
+                    text = { Text("¿Estás seguro que desea eliminar esta transacción?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                transaccion.id?.let { id ->
+                                    viewModel.eliminarTransaccionPorId(id, usuarioId) // SOLUCIONAR AL TERMINAR LOGIN
+                                }
+                                showEliminarTransaccion = false
+                            }
+                        ) {
+                            Text("Confirmar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showEliminarTransaccion = false }
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
+        }
     }
 }
