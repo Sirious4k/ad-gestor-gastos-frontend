@@ -50,6 +50,7 @@ import com.brandon.gestorgastos.model.Categoria
 import com.brandon.gestorgastos.model.TipoTransaccion
 import com.brandon.gestorgastos.model.Transaccion
 import com.brandon.gestorgastos.model.Usuario
+import com.brandon.gestorgastos.ui.components.BottomNavBar
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -60,8 +61,8 @@ import java.util.Locale
 @Composable
 fun CrearTransaccionScreen (
     viewModel: TransaccionViewModel = viewModel(),
+    usuarioId: Long,
     navController: NavController
-    // usuario: Usuario ---- para mas adelante
 ) {
     // Observar los estados del ViewModel
     val isLoading by viewModel.isLoading.observeAsState(false)
@@ -72,7 +73,6 @@ fun CrearTransaccionScreen (
 
     var monto by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
-    // var nombreUsuario = usuario.nombre ---- usar mas adelante
     var fecha by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -95,6 +95,13 @@ fun CrearTransaccionScreen (
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
+            )
+        },
+        bottomBar = {
+            BottomNavBar(
+                navController,
+                usuarioId,
+                "crearTransaccion/${usuarioId}"
             )
         }
     ) { paddingValues ->
@@ -291,7 +298,7 @@ fun CrearTransaccionScreen (
                                 ),
                                 modifier = Modifier.padding(16.dp),
                                 onClick = {
-                                    val usuarioObj = Usuario(id = 1, nombre = "prueba1", email = "admin@admin.com", password = "admin123")
+                                    val usuarioObj = Usuario(id = usuarioId, nombre = "", email = "", password = "")
                                     val tipoFinal = selectedOptionText
                                     val montoFinal = monto
                                     val fechaFinal = fecha
@@ -319,7 +326,7 @@ fun CrearTransaccionScreen (
                                                 snackbarHostState.showSnackbar(validacion)
                                             }
                                         } else {
-                                            viewModel.crearTransaccion(transaccion)
+                                            viewModel.crearTransaccion(transaccion, usuarioId)
                                         }
                                     }
                                 }
@@ -329,7 +336,7 @@ fun CrearTransaccionScreen (
 
                             Button(
                                 modifier = Modifier.padding(16.dp),
-                                onClick = { navController.navigate("transacciones") }
+                                onClick = { navController.navigate("transacciones/${usuarioId}") }
                             ) {
                                 Text("Ir a mis transacciones")
                             }
@@ -340,6 +347,9 @@ fun CrearTransaccionScreen (
             LaunchedEffect(isOk) {
                 isOk?.let {
                     snackbarHostState.showSnackbar(it)
+                    navController.navigate("transacciones/$usuarioId") {
+                        popUpTo("crearTransaccion/$usuarioId") { inclusive = true }
+                    }
                 }
             }
         }

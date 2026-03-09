@@ -53,13 +53,14 @@ class TransaccionViewModel : ViewModel() {
         }
     }
 
-    fun crearTransaccion(transaccion: Transaccion) {
+    fun crearTransaccion(transaccion: Transaccion, usuarioId: Long) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val response = repository.crearTransaccion(transaccion)
                 if (response.isSuccessful) {
                     _isOk.value = "Transacción creada con éxito ✅"
+                    obtenerTransacciones(usuarioId)
                 } else {
                     _error.value = "Error: ${response.code()}"
                 }

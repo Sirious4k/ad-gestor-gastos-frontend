@@ -16,6 +16,9 @@ class AuthViewModel: ViewModel() {
     private val _usuarioLogueado = MutableLiveData<Usuario?>()
     val usuarioLogueado: LiveData<Usuario?> = _usuarioLogueado
 
+    private val _usuarioRegistrado = MutableLiveData<Usuario?>()
+    val usuarioRegistrado: LiveData<Usuario?> = _usuarioRegistrado
+
     private val _isOk = MutableLiveData<String>()
     val isOk: LiveData<String> = _isOk
 

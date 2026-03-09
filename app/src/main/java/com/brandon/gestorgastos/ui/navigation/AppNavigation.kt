@@ -6,6 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.brandon.gestorgastos.ui.screens.CrearTransaccionScreen
 import com.brandon.gestorgastos.ui.screens.LoginScreen
+import com.brandon.gestorgastos.ui.screens.PerfilScreen
+import com.brandon.gestorgastos.ui.screens.RegisterScreen
 import com.brandon.gestorgastos.ui.screens.TransaccionesScreen
 
 @Composable
@@ -14,16 +16,44 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "transacciones"
+        startDestination = "login"
     ) {
-        composable("transacciones") {
-            TransaccionesScreen(navController = navController)
+        composable("transacciones/{usuarioId}") { backStackEntry ->
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId")?.toLongOrNull()
+
+            if (usuarioId != null) {
+                TransaccionesScreen(
+                    navController = navController,
+                    usuarioId = usuarioId
+                )
+            }
         }
-        composable("crearTransaccion") {
-            CrearTransaccionScreen(navController = navController)
+        composable("crearTransaccion/{usuarioId}") { backStackEntry ->
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId")?.toLongOrNull()
+
+            if (usuarioId != null) {
+                CrearTransaccionScreen(
+                    navController = navController,
+                    usuarioId = usuarioId
+                )
+            }
+
         }
         composable("login") {
             LoginScreen(navController = navController)
+        }
+        composable("register") {
+            RegisterScreen(navController = navController)
+        }
+        composable("perfil/{usuarioId}") { backStackEntry ->
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId")?.toLongOrNull()
+
+            if (usuarioId != null) {
+                PerfilScreen(
+                    navController = navController,
+                    usuarioId = usuarioId
+                )
+            }
         }
     }
 }

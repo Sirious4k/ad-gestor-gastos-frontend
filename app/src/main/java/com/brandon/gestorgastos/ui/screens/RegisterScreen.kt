@@ -3,7 +3,6 @@ package com.brandon.gestorgastos.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -19,26 +18,29 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen (
+fun RegisterScreen (
     navController: NavController,
     viewModel: AuthViewModel = viewModel()
 ) {
-    val usuarioLogueado by viewModel.usuarioLogueado.observeAsState()
+    val usuarioRegistrado by viewModel.usuarioRegistrado.observeAsState()
     val error by viewModel.error.observeAsState()
     val isOk by viewModel.isOk.observeAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var passwordVisible by remember { mutableStateOf(false) }
+    var passwordConfirmVisible by remember { mutableStateOf(false) }
 
+    var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordConfirm by remember { mutableStateOf("") }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Iniciar Sesión") },
+                title = { Text("Registro") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -56,6 +58,14 @@ fun LoginScreen (
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                TextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.padding(16.dp),
+                    placeholder = { Text("Ingrese su nombre de usuario") }
+                )
+
                 TextField(
                     value = email,
                     onValueChange = { email = it },
@@ -84,38 +94,69 @@ fun LoginScreen (
                     modifier = Modifier.padding(16.dp)
                 )
 
+                OutlinedTextField(
+                    value = passwordConfirm,
+                    onValueChange = { passwordConfirm = it },
+                    label = { Text("Repetir contraseña") },
+                    visualTransformation = if (passwordConfirmVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { passwordConfirmVisible = !passwordConfirmVisible }) {
+                            Icon(
+                                imageVector = if (passwordConfirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = if (passwordConfirmVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                            )
+                        }
+                    },
+                    modifier = Modifier.padding(16.dp)
+                )
+
                 Button(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
-                        if (email.isEmpty() || password.isEmpty()) {
+                        if (nombre.isEmpty() || email.isEmpty() || password.isEmpty()) {
                             scope.launch {
                                 snackbarHostState.showSnackbar("Todos los campos son obligatorios")
                             }
-                        } else {
-                            viewModel.login(email, password)
+                        } else if (password != passwordConfirm) {
                             scope.launch {
-                                snackbarHostState.showSnackbar(viewModel.isOk.toString())
+                                snackbarHostState.showSnackbar("Las contraseñas no coinciden ⚠️")
                             }
+                        } else {
+                            viewModel.register(nombre, email, password)
                         }
                     }
                 ) {
-                    Text("Iniciar sesión")
+                    Text("Registrarse")
                 }
 
                 TextButton(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
-                        navController.navigate("register")
+                        navController.navigate("login")
                     }
                 ) {
-                    Text("¿No tienes cuenta? Regístrate")
+                    Text("¿Ya tienes cuenta? Inicia sesión")
                 }
             }
-            LaunchedEffect(usuarioLogueado) {
-                usuarioLogueado?.let { usuario ->
-                    navController.navigate("transacciones/${usuario.id}") {
-                        popUpTo("login") { inclusive = true }
+            LaunchedEffect(isOk) {
+                isOk?.let {
+                    snackbarHostState.showSnackbar(it)
+                }
+            }
+            LaunchedEffect(usuarioRegistrado) {
+                usuarioRegistrado?.let {
+                    navController.navigate("login") {
+                        popUpTo("register") { inclusive = true }
                     }
+                }
+            }
+            LaunchedEffect(error) {
+                error?.let {
+                    snackbarHostState.showSnackbar(it)
                 }
             }
         }

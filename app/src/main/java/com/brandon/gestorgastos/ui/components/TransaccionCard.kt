@@ -39,6 +39,7 @@ import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 @Composable
 fun TransaccionCard (
     transaccion: Transaccion,
+    usuarioId: Long,
     snackbarHostState: SnackbarHostState,
     viewModel: TransaccionViewModel = viewModel(),
     modifier: Modifier = Modifier
@@ -130,7 +131,7 @@ fun TransaccionCard (
                         TextButton(
                             onClick = {
                                 transaccion.id?.let { id ->
-                                    viewModel.eliminarTransaccionPorId(id, usuarioId) // SOLUCIONAR AL TERMINAR LOGIN
+                                    viewModel.eliminarTransaccionPorId(id, usuarioId)
                                 }
                                 showEliminarTransaccion = false
                             }

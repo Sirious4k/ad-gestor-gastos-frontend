@@ -5,6 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -14,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.brandon.gestorgastos.ui.components.BottomNavBar
 import com.brandon.gestorgastos.ui.components.TransaccionCard
 import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 
@@ -21,7 +24,8 @@ import com.brandon.gestorgastos.viewmodel.TransaccionViewModel
 @Composable
 fun TransaccionesScreen (
     viewModel: TransaccionViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    usuarioId: Long
 ) {
     // Observar los estados del ViewModel
     val transacciones by viewModel.transacciones.observeAsState(emptyList())
@@ -32,7 +36,7 @@ fun TransaccionesScreen (
 
     // Cargar transacciones al iniciar
     LaunchedEffect(Unit) {
-        viewModel.obtenerTransacciones(usuarioId) // SOLUCIONAR AL TERMINAR LOGIN
+        viewModel.obtenerTransacciones(usuarioId)
     }
 
     Scaffold(
@@ -46,12 +50,12 @@ fun TransaccionesScreen (
                 )
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate("crearTransaccion") }
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar")
-            }
+        bottomBar = {
+            BottomNavBar(
+                navController,
+                usuarioId,
+                "transacciones/${usuarioId}"
+            )
         }
     ) { paddingValues ->
         Box(
@@ -87,6 +91,7 @@ fun TransaccionesScreen (
                         items(transacciones) { transaccion ->
                             TransaccionCard(
                                 transaccion = transaccion,
+                                usuarioId = usuarioId,
                                 snackbarHostState = snackbarHostState
                             )
                         }
@@ -95,6 +100,10 @@ fun TransaccionesScreen (
             }
         }
     }
+    LaunchedEffect(Unit) {
+        viewModel.obtenerTransacciones(usuarioId)
+    }
+
     LaunchedEffect(isOk) {
         isOk?.let {
             snackbarHostState.showSnackbar(it)
